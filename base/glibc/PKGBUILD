@@ -1,0 +1,57 @@
+pkgname=glibc
+pkgver=2.24
+pkgrel=1
+arch=('x86_64')
+source=("http://ftp.gnu.org/gnu/$pkgname/$pkgname-$pkgver.tar.xz"
+	"https://raw.githubusercontent.com/lsdlinux/lsdfiles/master/$pkgname/host.conf"
+	"https://raw.githubusercontent.com/lsdlinux/lsdfiles/master/$pkgname/hosts"
+	"https://raw.githubusercontent.com/lsdlinux/lsdfiles/master/$pkgname/ld.so.conf"
+	"https://raw.githubusercontent.com/lsdlinux/lsdfiles/master/$pkgname/nsswitch.conf"
+	"https://raw.githubusercontent.com/lsdlinux/lsdfiles/master/$pkgname/resolv.conf")
+md5sums=('SKIP'
+         'SKIP'
+         'SKIP'
+         'SKIP'
+         'SKIP'
+         'SKIP')
+
+build() {
+	cd $pkgname-$pkgver
+	mkdir -v build
+	cd       build
+	../configure --prefix=/usr                     \
+                     --libexecdir=/usr/lib             \
+                     --with-headers=/usr/include       \
+                     --enable-kernel=2.6.32            \
+                     --enable-obsolete-rpc             \
+                     --enable-add-ons                  \
+                     --enable-bind-now                 \
+                     --enable-stackguard-randomization \
+                     --enable-lock-elision             \
+                     --enable-static-nss               \
+                     --without-cvs                     \
+                     --without-gd                      \
+                     --without-selinux                 \
+                     --disable-profile                 \
+                     --disable-werror
+	make
+}
+
+package() {
+	cd $pkgname-$pkgver
+        cd       build
+        mkdir ${pkgdir}/etc
+	touch ${pkgdir}/etc/ld.so.conf
+	make install_root=${pkgdir} install
+	cp -v ../nscd/nscd.conf ${pkgdir}/etc/nscd.conf
+	mkdir -pv ${pkgdir}/var/cache/nscd
+	install -m644 ../posix/gai.conf ${pkgdir}/etc/gai.conf
+	rm -rvf ${pkgdir}/usr/share/zoneinfo
+	rm -v ${pkgdir}/usr/sbin/zdump
+	mkdir -pv ${pkgdir}/usr/lib/locale
+	rm -rf ${pkgdir}/etc/ld.so.conf
+	install -m 0644 ${srcdir}/{hosts,resolv.conf,nsswitch.conf,host.conf,ld.so.conf} ${pkgdir}/etc
+	mkdir -pv /etc/ld.so.conf.d
+	rm -rf ${pkgdir}/usr/bin/tzselect
+	rm -rf ${pkgdir}/usr/sbin/z{dump,ic}
+}
