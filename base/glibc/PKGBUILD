@@ -1,5 +1,5 @@
 pkgname=glibc
-pkgver=2.24
+pkgver=2.25
 pkgrel=1
 arch=('x86_64')
 source=("http://ftp.gnu.org/gnu/$pkgname/$pkgname-$pkgver.tar.xz"
@@ -22,7 +22,7 @@ build() {
 	../configure --prefix=/usr                     \
                      --libexecdir=/usr/lib             \
                      --with-headers=/usr/include       \
-                     --enable-kernel=2.6.32            \
+                     --enable-kernel=3.0.0             \
                      --enable-obsolete-rpc             \
                      --enable-add-ons                  \
                      --enable-bind-now                 \
